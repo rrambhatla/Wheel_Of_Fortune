@@ -8,6 +8,29 @@ Created on Wed May 29 23:08:13 2019
 import random
 from string import ascii_lowercase
 
+import logging
+class LoggerDemoConsole:
+    def testLog(self):
+        logger=logging.getLogger('Pgmlogger')
+        logger.setLevel(logging.INFO)
+        
+        consoleHandler = logging.StreamHandler()
+        consoleHandler.setLevel(logging.INFO)
+        
+        formatter=logging.Formatter('%(asctime)s-%(name)s-%(levelname)s: %(message)s',
+               datefmt='%m/%d/%Y %I:%M:%S %p')
+        
+        consoleHandler.setFormatter(formatter)
+        logger.addHandler(consoleHandler)
+        logger.debug('Debug Information')
+        logger.info('info Information')
+        logger.warn('Warning Information')
+        logger.error('error Information')
+        logger.critical('critical Information')            
+        
+pgmlog =LoggerDemoConsole()
+pgmlog.testLog()
+
 word_list = 'D:\Pythoncode\words.txt'
 
 def get_word(minimum_word_len):
