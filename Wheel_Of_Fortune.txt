@@ -1,0 +1,142 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 29 23:08:13 2019
+
+@author: rrambhatla
+"""
+
+import random
+from string import ascii_lowercase
+
+word_list = 'D:\Pythoncode\words.txt'
+
+def get_word(minimum_word_len):
+#  Get random word from the wordlist
+    words_processed = 0
+    current_word = None
+    with open(word_list, 'r') as f:
+        for word in f:
+# ignore if the length of the word < minimum length specified by player
+            if len(word) < minimum_word_len: 
+                continue
+            words_processed = words_processed + 1
+            if random.randint(1, words_processed) == 1:
+                current_word = word
+    return current_word
+
+# Now let the player choose difficulty level
+# Number of incorrect attempts for the game
+def num_attempts():
+    while True:
+        attempts = int(input('Choose incorrect attempts between 1-10:'))
+        try:
+            if 1 <= attempts <= 10:
+                return attempts
+            else:
+                print('{} is not between 1 and 10'.format(attempts))
+        except ValueError:
+            print('{} is not an integer between 1 and 10'.format(attempts))
+
+# To get desired minimum word length of user btw 4-16
+def player_min_word_length():
+    while True:
+        min_length = int(input('Select minimum word length you want between 4-16:'))
+        try:
+            if 4 <= min_length <= 16:
+                return min_length
+            else:
+                print('{} is not between 4 and 16'.format(min_length))
+        except ValueError:
+            print('{} is not an integer between 4 and 16'.format(min_length))
+
+# Get the word for display
+def display_word(word, idxs):
+    if len(word) != len(idxs):
+        raise ValueError('Word length and indices length are not equal')
+    displayed_word = ''.join([letter if idxs[i] else '*' for i, letter in enumerate(word)])
+    return displayed_word.strip()
+
+# Get next input letter of the player 
+def get_next_char(remaining_char):
+# To check if there are remaining characters or not
+    if len(remaining_char) == 0:
+        raise ValueError('There are no remaining char')
+    while True:
+        next_char = input('Choose the next char: ').lower()
+# to check how many characters did the player input in each attempt
+        if len(next_char) != 1:
+            print('{} is not a single char'.format(next_char))
+        elif next_char not in ascii_lowercase:
+            print('{} is not a char'.format(next_char))
+        elif next_char not in remaining_char:
+            print('{} has been guessed before'.format(next_char))
+        else:
+            remaining_char.remove(next_char)
+            return next_char
+
+def wheel_of_fortune():
+#    """Play Wheel_Of_Fortune.
+# Let player specify difficulty by selecting number of attempts and minimum length of word
+    print('Start Wheel_Of_Fortune...')
+    attempts_left = num_attempts()
+    minimum_word_len = player_min_word_length()
+
+# Select a word randomly
+    print('Selecting a word...')
+    word = get_word(minimum_word_len)
+    print()
+
+# Initialize variables
+    idxs = [letter not in ascii_lowercase for letter in word]
+    remaining_char = set(ascii_lowercase)
+# Create an empty list to append incorrect guesses later
+    wrong_letters = []
+    word_solved = False
+
+# Main loop
+    while attempts_left > 0 and not word_solved:
+        print('Word: {}'.format(display_word(word, idxs)))
+        print('Attempts left: {}'.format(attempts_left))
+        print('Previous Guesses: {}'.format(' '.join(wrong_letters)))
+
+# Get player's next char guess
+        next_char = get_next_char(remaining_char)
+
+# Check if char guess is in word
+        if next_char in word:
+# display if the guess is coorect
+            print('{} is in the word!'.format(next_char))
+
+# Reveal matching letters
+            for i in range(len(word)):
+                if word[i] == next_char:
+                    idxs[i] = True
+        else:
+# if Guessed incorrectly
+            print('{} is NOT in the word!'.format(next_char))
+
+# Decrement attempts left and append guess to wrong guesses
+            attempts_left -= 1
+            wrong_letters.append(next_char)
+
+# Check if word is completely solved
+        if False not in idxs:
+            word_solved = True
+        print()
+
+# game is over: reveal the word
+    print('The word is {}'.format(word))
+
+# Notify player of victory or defeat
+    if word_solved:
+        print('Congratulations! You won!')
+    else:
+        print('Try again!')
+
+# Ask if the player to try again
+    try_again = input('Would you like to try again? [Y/N] ')
+    return try_again.lower() == 'y'
+
+if __name__ == '__main__':
+    while wheel_of_fortune():
+        print()
